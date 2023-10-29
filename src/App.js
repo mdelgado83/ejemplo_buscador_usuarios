@@ -9,13 +9,23 @@ function App() {
   const [query, setQuery] = useState("");
   const [resultado, setResultado] = useState(null);
 
-  const callServer = async function () {
+  const callServer = async function (todos) {
     console.log("CLIK");
     if (CONFIG.use_server) {
-      const response = await fetch(CONFIG.server_url);
-      const data = await response.json();
-      console.log(data);
-      setResultado(data.users);
+      try {
+        let queryParams;
+        if (todos === true) {
+          queryParams = "?limt=" + CONFIG.num_items;
+        } else {
+          queryParams = "/search?q=" + query;
+        }
+        const response = await fetch(`${CONFIG.server_url}${queryParams}`);
+        const data = await response.json();
+        console.log(data);
+        setResultado(data.users);
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       setResultado(mock1.users);
     }
@@ -29,9 +39,13 @@ function App() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
-      <button id="butonsearch" onClick={() => callServer()}>
+      <button id="butonsearch" onClick={() => callServer(false)}>
         Buscar
       </button>
+      <button id="butonAll" onClick={() => callServer(true)}>
+        Buscar Todos
+      </button>
+
       {resultado && <Resultados resultado={resultado} />}
     </div>
   );
